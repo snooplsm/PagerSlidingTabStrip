@@ -39,13 +39,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.widget.HorizontalScrollView;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.astuetz.pagerslidingtabstrip.R;
 
-public class PagerSlidingTabStrip extends HorizontalScrollView {
+public class PagerSlidingTabStrip extends FrameLayout {
 
     public static final int DEF_VALUE_TAB_TEXT_ALPHA = 150;
     private static final int[] ANDROID_ATTRS = new int[]{
@@ -118,7 +118,6 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 
     public PagerSlidingTabStrip(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        setFillViewport(true);
         setWillNotDraw(false);
         mTabsContainer = new LinearLayout(context);
         mTabsContainer.setOrientation(LinearLayout.HORIZONTAL);
@@ -289,28 +288,6 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         }
     }
 
-    private void scrollToChild(int position, int offset) {
-        if (mTabCount == 0) {
-            return;
-        }
-
-        int newScrollX = mTabsContainer.getChildAt(position).getLeft() + offset;
-        if (position > 0 || offset > 0) {
-            //Half screen offset.
-            //- Either tabs start at the middle of the view scrolling straight away
-            //- Or tabs start at the begging (no padding) scrolling when indicator gets
-            //  to the middle of the view width
-            newScrollX -= mScrollOffset;
-            Pair<Float, Float> lines = getIndicatorCoordinates();
-            newScrollX += ((lines.second - lines.first) / 2);
-        }
-
-        if (newScrollX != mLastScrollX) {
-            mLastScrollX = newScrollX;
-            scrollTo(newScrollX, 0);
-        }
-    }
-
     private Pair<Float, Float> getIndicatorCoordinates() {
         // default: line below current tab
         View currentTab = mTabsContainer.getChildAt(mCurrentPosition);
@@ -375,7 +352,6 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
             if (mScrollOffset == 0) mScrollOffset = getWidth() / 2 - mPaddingLeft;
             mCurrentPosition = mPager.getCurrentItem();
             mCurrentPositionOffset = 0f;
-            scrollToChild(mCurrentPosition, 0);
             updateSelection(mCurrentPosition);
         }
 
@@ -437,7 +413,6 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
             mCurrentPosition = position;
             mCurrentPositionOffset = positionOffset;
             int offset = mTabCount > 0 ? (int) (positionOffset * mTabsContainer.getChildAt(position).getWidth()) : 0;
-            scrollToChild(position, offset);
             invalidate();
             if (mDelegatePageListener != null) {
                 mDelegatePageListener.onPageScrolled(position, positionOffset, positionOffsetPixels);
@@ -447,7 +422,6 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         @Override
         public void onPageScrollStateChanged(int state) {
             if (state == ViewPager.SCROLL_STATE_IDLE) {
-                scrollToChild(mPager.getCurrentItem(), 0);
             }
             //Full tabTextAlpha for current item
             View currentTab = mTabsContainer.getChildAt(mPager.getCurrentItem());
