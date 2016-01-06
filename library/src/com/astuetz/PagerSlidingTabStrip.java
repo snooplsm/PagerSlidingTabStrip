@@ -218,7 +218,8 @@ public class PagerSlidingTabStrip extends FrameLayout {
         }
 
         isCustomTabs = pager.getAdapter() instanceof CustomTabProvider;
-        pager.setOnPageChangeListener(mPageListener);
+        pager.removeOnPageChangeListener(mPageListener);
+        pager.addOnPageChangeListener(mPageListener);
         pager.getAdapter().registerDataSetObserver(mAdapterObserver);
         mAdapterObserver.setAttached(true);
         notifyDataSetChanged();
